@@ -15,10 +15,10 @@ app.use(express.static(__dirname + '/public'));
 
 // our database is an array for now with some hardcoded values
 var todos = [
-  // { _id: 7, task: 'Laundry', description: 'Wash clothes' },
-  // { _id: 27, task: 'Grocery Shopping', description: 'Buy dinner for this week' },
-  // { _id: 44, task: 'Homework', description: 'Make this app super awesome!' }
-];
+ { _id: 7, task: 'Laundry', description: 'Wash clothes' },
+ { _id: 27, task: 'Grocery Shopping', description: 'Buy dinner for this week' },
+ { _id: 44, task: 'Homework', description: 'Make this app super awesome!' }
+ ];
 
 /**********
  * ROUTES *
@@ -44,41 +44,77 @@ app.get('/', function homepage(req, res) {
  */
 
 app.get('/api/todos/search', function search(req, res) {
-  /* This endpoint responds with the search results from the
-   * query in the request. COMPLETE THIS ENDPOINT LAST.
-   */
+  res.json({todos: todos});
 });
 
 app.get('/api/todos', function index(req, res) {
+  // var todosArray = {todos: todos};
+  // res.json(todosArray)
+  res.status(200).json({todos: todos});
+
   /* This endpoint responds with all of the todos
    */
 });
 
 app.post('/api/todos', function create(req, res) {
-  /* This endpoint will add a todo to our "database"
-   * and respond with the newly created todo.
-   */
+  // create new todo with form data (`req.body`)
+    var newTodo = req.body;
+ // set sequential id (last id in `todos` array + 1)
+    if (todos.length > 0) {
+    newTodo._id = todos[todos.length - 1]._id + 1;
+      } else {
+          newTodo._id = 1;
+      }
+ // add newTodo to `todos` array
+ todos.push(newTodo);
+ // send newTodo as JSON response
+ res.json(newTodo);
 });
 
+
 app.get('/api/todos/:id', function show(req, res) {
-  /* This endpoint will return a single todo with the
-   * id specified in the route parameter (:id)
-   */
+// get todo id from url params (`req.params`)
+  var todoId = parseInt(req.params.id);
+// find todo to by its id
+  var foundTodo = todos.filter(function (todo) {
+    return todo._id == todoId;
+})[0];
+// send foundTodo as JSON response
+  res.json(foundTodo);
 });
 
 app.put('/api/todos/:id', function update(req, res) {
-  /* This endpoint will update a single todo with the
-   * id specified in the route parameter (:id) and respond
-   * with the newly updated todo.
-   */
+  // get todo id from url params (`req.params`)
+  var todoId = parseInt(req.params.id);
+  // find todo to update by its id
+  var todoToUpdate = todos.filter(function (todo) {
+    return todo._id == todoId;
+  })[0];
+  // update the todo's task
+  todoToUpdate.task = req.body.task;
+
+  // update the todo's description
+  todoToUpdate.description = req.body.description;
+
+  res.json(todoToUpdate);
 });
 
 app.delete('/api/todos/:id', function destroy(req, res) {
-  /* This endpoint will delete a single todo with the
-   * id specified in the route parameter (:id) and respond
-   * with success.
-   */
-});
+  req.params.id
+  // get todo id from url params (`req.params`)
+    var todoId = parseInt(req.params.id);
+
+    // find todo to delete by its id
+    var todoToDelete = todos.filter(function (todo) {
+      return todo._id == todoId;
+    })[0];
+
+    // remove todo from `todos` array
+    todos.splice(todos.indexOf(todoToDelete), 1);
+
+    // send back deleted todo
+    res.json(todoToDelete);
+  });
 
 /**********
  * SERVER *
